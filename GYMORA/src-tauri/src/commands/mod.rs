@@ -13,3 +13,4 @@ pub mod alumnos;
 pub mod cuotas;
 pub mod pagos;
 pub mod asistencias;
+pub mod dashboard;

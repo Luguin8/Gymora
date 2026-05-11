@@ -147,3 +147,35 @@ pub struct RespuestaAsistencia {
     /// Mensaje descriptivo del resultado, ej: "Acceso permitido. Te quedan 7 clases."
     pub mensaje: String,
 }
+
+// =================================================================
+// MODELO: MetricasDashboard (Fase 6)
+// =================================================================
+
+/// Métricas del día para el panel de control (Dashboard).
+#[derive(Debug, Serialize)]
+pub struct MetricasDashboard {
+    /// Suma de todos los pagos del día
+    pub ingresos_totales: f64,
+    /// Suma de pagos en efectivo del día
+    pub ingresos_efectivo: f64,
+    /// Suma de pagos por transferencia del día
+    pub ingresos_transferencia: f64,
+    /// Cantidad de asistencias registradas hoy
+    pub cantidad_asistencias_hoy: i64,
+    /// Cantidad total de alumnos activos en el sistema
+    pub cantidad_alumnos_activos: i64,
+}
+
+// =================================================================
+// MODELO: CobroPorUsuario (usado internamente por generar_pdf_caja)
+// =================================================================
+
+/// Desglose de cobros por usuario para el cierre de caja.
+#[derive(Debug, Serialize)]
+pub struct CobroPorUsuario {
+    pub nombre_usuario: String,
+    pub rol: String,
+    pub total_cobrado: f64,
+}
+

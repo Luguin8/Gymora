@@ -45,6 +45,8 @@ pub fn run() {
         // Plugin de actualizaciones automáticas (configurado en tauri.conf.json)
         // Listo para conectarse a GitHub Releases u otro endpoint a futuro
         .plugin(tauri_plugin_updater::Builder::new().build())
+        // Plugin de diálogo nativo (Save As, Open File, etc.)
+        .plugin(tauri_plugin_dialog::init())
         // Setup: inicialización que requiere acceso al AppHandle
         .setup(|app| {
             // Inicializamos la base de datos SQLite.
@@ -89,6 +91,10 @@ pub fn run() {
 
             // Asistencias (kiosco — comando CORE)
             commands::asistencias::registrar_asistencia,
+
+            // --- Fase 6: Dashboard y PDF ---
+            commands::dashboard::obtener_metricas_dashboard,
+            commands::dashboard::generar_pdf_caja,
         ])
         .run(tauri::generate_context!())
         .expect("Error fatal al ejecutar la aplicación GYMORA");

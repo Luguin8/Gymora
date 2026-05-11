@@ -39,3 +39,9 @@ rusqlite = { version = "0.35", features = ["bundled"] }
 uuid = { version = "1", features = ["v4"] }
 # Manejo de fechas para registro de activación
 chrono = "0.4"
+
+# --- Fase 6: Dashboard y Exportación PDF ---
+# Generación de PDFs para cierre de caja
+genpdf = "0.2"
+# Diálogo nativo de guardado de archivos (Windows Save As)
+tauri-plugin-dialog = "2"
