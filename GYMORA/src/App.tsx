@@ -1,21 +1,57 @@
 // App.tsx — Componente raíz de GYMORA
 //
 // Responsabilidades:
-//   1. Al montar, verifica el estado de la licencia invocando el backend Rust
-//   2. Si la licencia es válida → muestra la app principal (placeholder para Fase 2+)
-//   3. Si la licencia NO es válida → muestra la pantalla de activación bloqueante
-//   4. Mientras verifica, muestra un loading state minimalista
+//   1. Verificación de licencia al montar (gate de seguridad — Fase 1)
+//   2. Proveer el contexto de autenticación (AuthProvider — Fase 3)
+//   3. Configurar el router con todas las rutas del sistema
 //
-// IMPORTANTE: Este componente es el "gate" de seguridad. Nada de la app
-// se renderiza hasta que la licencia esté verificada.
+// Arquitectura de rutas:
+//   /         → KioscoPlaceholder (Fase 4: captura de DNI)
+//   /login    → LoginScreen (setup inicial o login con PIN)
+//   /admin    → ProtectedRoute → AdminLayout → sub-rutas
+//     /admin          → DashboardPage
+//     /admin/alumnos  → AlumnosPage
+//     /admin/caja     → CajaPage
+//     /admin/ajustes  → AjustesPage
+//
+// ¿Por qué HashRouter y no BrowserRouter?
+// Tauri sirve los archivos como file:// en producción. BrowserRouter
+// depende de un servidor web que maneje las rutas, lo cual no existe
+// en una app de escritorio. HashRouter usa el fragmento (#) de la URL,
+// que funciona correctamente tanto en dev como en producción.
 
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { HashRouter, Routes, Route } from "react-router-dom";
+
+// --- Fase 1: Activación ---
 import ActivationScreen from "./components/ActivationScreen";
+
+// --- Fase 3: Auth y Layout ---
+import { AuthProvider } from "./context/AuthContext";
+import LoginScreen from "./components/LoginScreen";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminLayout from "./components/AdminLayout";
+import KioscoPlaceholder from "./components/KioscoPlaceholder";
+import {
+  DashboardPage,
+  AlumnosPage,
+  CajaPage,
+  AjustesPage,
+} from "./components/AdminPlaceholder";
+
 import "./App.css";
+
+// ===================================================================
+// TIPOS
+// ===================================================================
 
 /// Posibles estados de la verificación de licencia
 type LicenseStatus = "loading" | "valid" | "invalid";
+
+// ===================================================================
+// COMPONENTE PRINCIPAL
+// ===================================================================
 
 function App() {
   // Estado de la licencia — arranca en "loading" hasta que Rust responda
@@ -60,8 +96,9 @@ function App() {
     setLicenseStatus("valid");
   };
 
-  // === RENDER: Estado de carga ===
-  // Pantalla minimalista mientras verificamos la licencia con el backend
+  // ===================================================================
+  // RENDER: Estado de carga (verificando licencia)
+  // ===================================================================
   if (licenseStatus === "loading") {
     return (
       <div className="min-h-screen bg-gymora-bg flex items-center justify-center">
@@ -80,7 +117,9 @@ function App() {
     );
   }
 
-  // === RENDER: Licencia inválida → Pantalla de activación ===
+  // ===================================================================
+  // RENDER: Licencia inválida → Pantalla de activación bloqueante
+  // ===================================================================
   if (licenseStatus === "invalid") {
     return (
       <ActivationScreen
@@ -90,33 +129,41 @@ function App() {
     );
   }
 
-  // === RENDER: Licencia válida → App principal ===
-  // Placeholder para las fases futuras (Fase 2: CRUD, Fase 3: Login, etc.)
+  // ===================================================================
+  // RENDER: Licencia válida → App completa con routing
+  // ===================================================================
+  // Envolvemos todo en AuthProvider para que el estado de autenticación
+  // esté disponible en todas las rutas vía useAuth().
   return (
-    <div className="min-h-screen bg-gymora-bg flex items-center justify-center">
-      <div className="text-center animate-fade-in-up">
-        {/* Indicador de estado activo */}
-        <div className="flex justify-center mb-6">
-          <div className="w-3 h-3 bg-gymora-success rounded-none" />
-        </div>
+    <AuthProvider>
+      <HashRouter>
+        <Routes>
+          {/* ============================== */}
+          {/* Ruta pública: Kiosco */}
+          {/* ============================== */}
+          <Route path="/" element={<KioscoPlaceholder />} />
 
-        <h1 className="text-3xl font-bold tracking-tight text-gymora-text mb-2">
-          GYMORA
-        </h1>
-        <p className="text-sm text-gymora-text-muted font-light tracking-widest uppercase mb-8">
-          Sistema de Gestión de Gimnasio
-        </p>
+          {/* ============================== */}
+          {/* Ruta pública: Login */}
+          {/* ============================== */}
+          <Route path="/login" element={<LoginScreen />} />
 
-        <div className="bg-gymora-surface border border-gymora-border rounded-none px-8 py-6">
-          <p className="text-sm text-gymora-text-muted">
-            Licencia activa — Sistema listo.
-          </p>
-          <p className="text-xs text-gymora-text-muted/50 mt-2">
-            Los módulos del sistema se habilitarán en las próximas fases.
-          </p>
-        </div>
-      </div>
-    </div>
+          {/* ============================== */}
+          {/* Rutas protegidas: Admin */}
+          {/* ProtectedRoute verifica que haya un usuario autenticado */}
+          {/* Si no → redirige a /login */}
+          {/* ============================== */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<DashboardPage />} />
+              <Route path="/admin/alumnos" element={<AlumnosPage />} />
+              <Route path="/admin/caja" element={<CajaPage />} />
+              <Route path="/admin/ajustes" element={<AjustesPage />} />
+            </Route>
+          </Route>
+        </Routes>
+      </HashRouter>
+    </AuthProvider>
   );
 }
 

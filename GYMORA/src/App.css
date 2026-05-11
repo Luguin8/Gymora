@@ -7,11 +7,12 @@
  * No se permite NINGÚN borde redondeado en toda la aplicación.
  */
 
-@import "tailwindcss";
-
 /* ===== TIPOGRAFÍA GLOBAL ===== */
 /* Usamos Inter como fuente principal — clean, moderna, legible */
+/* NOTA: Este @import debe ir ANTES de @import "tailwindcss" por spec CSS */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
 
 /* ===== TEMA CUSTOM ===== */
 @theme {
