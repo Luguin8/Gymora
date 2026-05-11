@@ -116,3 +116,16 @@ input, textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gymora-text-muted);
 }
+
+/* ===== ANIMACIONES DEL KIOSCO (Fase 4) ===== */
+
+/* Barra de progreso que se encoge para el auto-cierre de resultado */
+@keyframes shrinkBar {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+

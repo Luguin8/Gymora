@@ -2,7 +2,9 @@
 //
 // Esta pantalla tiene DOS modos:
 //   A) Setup Inicial: Si no hay usuarios en el sistema, muestra un formulario
-//      para crear el primer "Dueño" con nombre y PIN de 4 dígitos.
+//      para crear el primer "Dueño" con nombre, PIN de 4 dígitos, y nombre del gimnasio.
+//      El nombre del gimnasio se guarda en localStorage ('gymora_gym_name') para
+//      que el kiosco lo muestre en la pantalla de reposo.
 //   B) Login Normal: Si hay usuarios, muestra un dropdown para elegir el perfil
 //      y un campo de PIN para autenticarse.
 //
@@ -43,6 +45,7 @@ export default function LoginScreen() {
   // --- Estado del modo Setup Inicial ---
   const [setupNombre, setSetupNombre] = useState("");
   const [setupPin, setSetupPin] = useState("");
+  const [setupGymName, setSetupGymName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   // --- Estado del modo Login Normal ---
@@ -82,6 +85,10 @@ export default function LoginScreen() {
   /// Después de crearlo, recargamos la lista de usuarios para
   /// pasar al modo de login normal automáticamente.
   const handleSetup = async () => {
+    if (!setupGymName.trim()) {
+      setError("Ingresá el nombre del gimnasio");
+      return;
+    }
     if (!setupNombre.trim()) {
       setError("Ingresá tu nombre");
       return;
@@ -95,6 +102,10 @@ export default function LoginScreen() {
     setError("");
 
     try {
+      // Guardar el nombre del gimnasio en localStorage.
+      // El kiosco lo leerá para mostrarlo en la pantalla de reposo.
+      localStorage.setItem("gymora_gym_name", setupGymName.trim());
+
       await invoke("crear_usuario", {
         nombre: setupNombre.trim(),
         rol: "dueño",
@@ -105,6 +116,7 @@ export default function LoginScreen() {
       // Limpiar campos de setup
       setSetupNombre("");
       setSetupPin("");
+      setSetupGymName("");
     } catch (err) {
       setError(`${err}`);
     } finally {
@@ -193,10 +205,32 @@ export default function LoginScreen() {
           {/* Card de Setup */}
           <div className="bg-gymora-surface border border-gymora-border rounded-none p-6 space-y-5">
             <p className="text-sm text-gymora-text-muted">
-              No hay usuarios registrados. Creá la cuenta del <strong className="text-gymora-text">Dueño</strong> para comenzar.
+              No hay usuarios registrados. Configurá el sistema y creá la cuenta del <strong className="text-gymora-text">Dueño</strong> para comenzar.
             </p>
 
-            {/* Campo: Nombre */}
+            {/* Campo: Nombre del Gimnasio */}
+            <div className="space-y-2">
+              <label
+                htmlFor="setup-gym-name"
+                className="block text-xs font-semibold text-gymora-text-muted uppercase tracking-wider"
+              >
+                Nombre del Gimnasio
+              </label>
+              <input
+                id="setup-gym-name"
+                type="text"
+                value={setupGymName}
+                onChange={(e) => {
+                  setSetupGymName(e.target.value);
+                  setError("");
+                }}
+                placeholder="Ej: Gimnasio Iron Fit"
+                className="w-full bg-gymora-bg border border-gymora-border rounded-none px-4 py-3.5 text-base text-gymora-text placeholder-gymora-text-muted/50 focus:outline-none focus:border-gymora-accent transition-colors duration-150"
+                autoFocus
+              />
+            </div>
+
+            {/* Campo: Nombre del Dueño */}
             <div className="space-y-2">
               <label
                 htmlFor="setup-nombre"
@@ -214,7 +248,6 @@ export default function LoginScreen() {
                 }}
                 placeholder="Ej: Juan Pérez"
                 className="w-full bg-gymora-bg border border-gymora-border rounded-none px-4 py-3.5 text-base text-gymora-text placeholder-gymora-text-muted/50 focus:outline-none focus:border-gymora-accent transition-colors duration-150"
-                autoFocus
               />
             </div>
 

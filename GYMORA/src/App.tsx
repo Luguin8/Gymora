@@ -32,7 +32,7 @@ import { AuthProvider } from "./context/AuthContext";
 import LoginScreen from "./components/LoginScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/AdminLayout";
-import KioscoPlaceholder from "./components/KioscoPlaceholder";
+import KioscoScreen from "./components/KioscoScreen";
 import {
   DashboardPage,
   AlumnosPage,
@@ -141,7 +141,7 @@ function App() {
           {/* ============================== */}
           {/* Ruta pública: Kiosco */}
           {/* ============================== */}
-          <Route path="/" element={<KioscoPlaceholder />} />
+          <Route path="/" element={<KioscoScreen />} />
 
           {/* ============================== */}
           {/* Ruta pública: Login */}
