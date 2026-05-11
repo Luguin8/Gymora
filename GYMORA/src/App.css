@@ -1,0 +1,117 @@
+/* App.css — Estilos globales de GYMORA
+ *
+ * Tailwind CSS v4: se importa con @import en lugar de directivas @tailwind.
+ * Este archivo contiene la configuración global del tema y las utilidades custom.
+ *
+ * REGLA ESTRICTA: Todos los elementos usan esquinas rectas (rounded-none).
+ * No se permite NINGÚN borde redondeado en toda la aplicación.
+ */
+
+@import "tailwindcss";
+
+/* ===== TIPOGRAFÍA GLOBAL ===== */
+/* Usamos Inter como fuente principal — clean, moderna, legible */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ===== TEMA CUSTOM ===== */
+@theme {
+  /* Colores de marca GYMORA — paleta industrial/oscura con acento ámbar */
+  --color-gymora-bg: #0a0a0a;
+  --color-gymora-surface: #141414;
+  --color-gymora-surface-alt: #1e1e1e;
+  --color-gymora-border: #2a2a2a;
+  --color-gymora-text: #e5e5e5;
+  --color-gymora-text-muted: #737373;
+  --color-gymora-accent: #f59e0b;
+  --color-gymora-accent-hover: #d97706;
+  --color-gymora-danger: #ef4444;
+  --color-gymora-success: #22c55e;
+}
+
+/* ===== ESTILOS BASE ===== */
+/* Reset: forzamos esquinas rectas globalmente */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-gymora-bg);
+  color: var(--color-gymora-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevenir selección de texto en la UI (es una app de escritorio) */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Los inputs SÍ deben permitir selección de texto */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== UTILIDADES CUSTOM ===== */
+/* Clase para el Hardware ID — fuente monoespaciada para legibilidad */
+.font-mono-hwid {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+/* Animación sutil de entrada para la pantalla de activación */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Animación de pulso para el indicador de estado */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Scrollbar custom para mantener la estética */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gymora-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gymora-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gymora-text-muted);
+}
