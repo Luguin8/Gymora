@@ -7,11 +7,24 @@
 //   - hardware_id: Generación del fingerprint único de hardware
 //   - database: Inicialización de SQLite con WAL mode
 //   - license: Verificación y activación de licencia
+//
+// Módulos de la Fase 2:
+//   - models: Structs serializables del dominio (Usuario, Alumno, Cuota, etc.)
+//   - commands: Submódulo con los comandos CRUD agrupados por entidad
+//     ├── usuarios: CRUD de dueños/profesores + validación de PIN
+//     ├── alumnos: CRUD con búsqueda flexible por nombre/DNI
+//     ├── cuotas: Gestión de planes (mensual/paquete de clases)
+//     ├── pagos: Registro de cobros en caja
+//     └── asistencias: Lógica core del kiosco de recepción
 
-// Declaración de módulos internos
+// Declaración de módulos internos — Fase 1
 mod hardware_id;
 mod database;
 mod license;
+
+// Declaración de módulos internos — Fase 2
+mod models;
+mod commands;
 
 use database::initialize_database;
 // Manager trait requerido para .manage() y otros métodos de Tauri v2
@@ -36,6 +49,7 @@ pub fn run() {
         .setup(|app| {
             // Inicializamos la base de datos SQLite.
             // Esto crea el archivo gymora.db en AppData/Local y configura WAL mode.
+            // En Fase 2: ahora también crea las tablas de dominio (usuarios, alumnos, etc.)
             let db_state = initialize_database(app.handle())
                 .expect("Error crítico: no se pudo inicializar la base de datos");
 
@@ -49,9 +63,32 @@ pub fn run() {
         // Registro de comandos Tauri expuestos al frontend React.
         // Cada función aquí es invocable desde JS con `invoke("nombre_comando")`.
         .invoke_handler(tauri::generate_handler![
+            // --- Fase 1: Licencia y seguridad ---
             license::check_license,
             license::activate_license,
             license::get_hardware_id,
+
+            // --- Fase 2: CRUD de dominio ---
+            // Usuarios (dueño/profesor)
+            commands::usuarios::crear_usuario,
+            commands::usuarios::validar_pin,
+            commands::usuarios::obtener_usuarios,
+
+            // Alumnos
+            commands::alumnos::crear_alumno,
+            commands::alumnos::obtener_alumno_por_dni,
+            commands::alumnos::buscar_alumnos,
+
+            // Cuotas (planes)
+            commands::cuotas::crear_cuota,
+            commands::cuotas::obtener_cuotas_alumno,
+
+            // Pagos (caja)
+            commands::pagos::registrar_pago,
+            commands::pagos::obtener_pagos_alumno,
+
+            // Asistencias (kiosco — comando CORE)
+            commands::asistencias::registrar_asistencia,
         ])
         .run(tauri::generate_context!())
         .expect("Error fatal al ejecutar la aplicación GYMORA");
