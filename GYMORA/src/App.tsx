@@ -33,12 +33,11 @@ import LoginScreen from "./components/LoginScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/AdminLayout";
 import KioscoScreen from "./components/KioscoScreen";
-import {
-  DashboardPage,
-  AlumnosPage,
-  CajaPage,
-  AjustesPage,
-} from "./components/AdminPlaceholder";
+// --- Fase 5: Admin pages reales ---
+import DashboardPage from "./pages/DashboardPage";
+import AlumnosPage from "./pages/AlumnosPage";
+import CajaPage from "./pages/CajaPage";
+import AjustesPage from "./pages/AjustesPage";
 
 import "./App.css";
 

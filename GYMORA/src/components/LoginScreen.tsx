@@ -18,7 +18,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "../context/AuthContext";
-import { Shield, UserPlus, LogIn, AlertCircle } from "lucide-react";
+import { Shield, UserPlus, LogIn, AlertCircle, ImagePlus } from "lucide-react";
 
 // ===================================================================
 // TIPOS
@@ -46,6 +46,8 @@ export default function LoginScreen() {
   const [setupNombre, setSetupNombre] = useState("");
   const [setupPin, setSetupPin] = useState("");
   const [setupGymName, setSetupGymName] = useState("");
+  const [setupLogo, setSetupLogo] = useState<string | null>(null);
+  const [setupLogoPreview, setSetupLogoPreview] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   // --- Estado del modo Login Normal ---
@@ -106,6 +108,11 @@ export default function LoginScreen() {
       // El kiosco lo leerá para mostrarlo en la pantalla de reposo.
       localStorage.setItem("gymora_gym_name", setupGymName.trim());
 
+      // Guardar logo si se subió
+      if (setupLogo) {
+        localStorage.setItem("gymora_gym_logo", setupLogo);
+      }
+
       await invoke("crear_usuario", {
         nombre: setupNombre.trim(),
         rol: "dueño",
@@ -117,6 +124,8 @@ export default function LoginScreen() {
       setSetupNombre("");
       setSetupPin("");
       setSetupGymName("");
+      setSetupLogo(null);
+      setSetupLogoPreview(null);
     } catch (err) {
       setError(`${err}`);
     } finally {
@@ -248,6 +257,63 @@ export default function LoginScreen() {
                 }}
                 placeholder="Ej: Juan Pérez"
                 className="w-full bg-gymora-bg border border-gymora-border rounded-none px-4 py-3.5 text-base text-gymora-text placeholder-gymora-text-muted/50 focus:outline-none focus:border-gymora-accent transition-colors duration-150"
+              />
+            </div>
+
+            {/* Campo: Logo del Gimnasio (opcional) */}
+            <div className="space-y-2">
+              <label
+                htmlFor="setup-logo"
+                className="block text-xs font-semibold text-gymora-text-muted uppercase tracking-wider"
+              >
+                Logo del Gimnasio (opcional)
+              </label>
+              {setupLogoPreview ? (
+                <div className="relative">
+                  <img
+                    src={setupLogoPreview}
+                    alt="Preview"
+                    className="w-full h-32 object-contain bg-gymora-bg border border-gymora-border rounded-none p-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSetupLogo(null);
+                      setSetupLogoPreview(null);
+                    }}
+                    className="absolute top-1 right-1 bg-gymora-danger/80 text-white text-xs px-2 py-1 rounded-none cursor-pointer hover:bg-gymora-danger transition-colors"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ) : (
+                <label
+                  htmlFor="setup-logo"
+                  className="flex items-center justify-center gap-2 w-full bg-gymora-bg border border-dashed border-gymora-border rounded-none px-4 py-4 text-sm text-gymora-text-muted cursor-pointer hover:border-gymora-accent hover:text-gymora-accent transition-colors duration-150"
+                >
+                  <ImagePlus size={18} />
+                  Seleccionar imagen
+                </label>
+              )}
+              <input
+                id="setup-logo"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  // Convertir a Base64 para guardar en localStorage
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    const base64 = ev.target?.result as string;
+                    setSetupLogo(base64);
+                    setSetupLogoPreview(base64);
+                  };
+                  reader.readAsDataURL(file);
+                  // Reset el input para permitir subir el mismo archivo otra vez
+                  e.target.value = "";
+                }}
               />
             </div>
 

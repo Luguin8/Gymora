@@ -55,6 +55,9 @@ const RESULT_DISPLAY_MS = 3500;
 /// Clave de localStorage para el nombre del gimnasio (seteada en setup)
 const GYM_NAME_KEY = "gymora_gym_name";
 
+/// Clave de localStorage para el logo del gimnasio (Base64)
+const GYM_LOGO_KEY = "gymora_gym_logo";
+
 // ===================================================================
 // COMPONENTE PRINCIPAL
 // ===================================================================
@@ -70,6 +73,8 @@ export default function KioscoScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   // Nombre del gimnasio recuperado de localStorage
   const [gymName, setGymName] = useState("");
+  // Logo del gimnasio en Base64 (null si no se subió)
+  const [gymLogo, setGymLogo] = useState<string | null>(null);
   // Guard contra doble-submit
   const isProcessingRef = useRef(false);
   // Timer de limpieza del buffer de typing
@@ -85,6 +90,8 @@ export default function KioscoScreen() {
   useEffect(() => {
     const name = localStorage.getItem(GYM_NAME_KEY);
     setGymName(name || "GIMNASIO");
+    const logo = localStorage.getItem(GYM_LOGO_KEY);
+    setGymLogo(logo);
   }, []);
 
   // ================================================================
@@ -390,11 +397,19 @@ export default function KioscoScreen() {
     <div className="min-h-screen bg-gymora-bg flex flex-col items-center justify-center p-4 relative">
       {/* === CONTENIDO CENTRAL === */}
       <div className="text-center animate-fade-in-up">
-        {/* Logo placeholder (Hexagon) */}
+        {/* Logo del gimnasio (real o placeholder) */}
         <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 bg-gymora-surface border border-gymora-border rounded-none flex items-center justify-center">
-            <Hexagon size={40} className="text-gymora-accent" strokeWidth={1.5} />
-          </div>
+          {gymLogo ? (
+            <img
+              src={gymLogo}
+              alt={gymName}
+              className="h-48 object-contain rounded-none"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-gymora-surface border border-gymora-border rounded-none flex items-center justify-center">
+              <Hexagon size={40} className="text-gymora-accent" strokeWidth={1.5} />
+            </div>
+          )}
         </div>
 
         {/* Nombre del gimnasio */}
@@ -425,8 +440,8 @@ export default function KioscoScreen() {
           // --- Estado TYPING: Números gigantes ---
           <div className="space-y-4">
             <div className="bg-gymora-surface border border-gymora-accent/30 rounded-none px-10 py-8 min-w-[400px]">
-              {/* DNI en tipografía gigante monoespaciada */}
-              <p className="text-8xl font-bold tracking-[0.15em] text-gymora-accent font-mono-hwid leading-none">
+              {/* DNI en tipografía MASIVA monoespaciada */}
+              <p className="text-[12rem] md:text-[15rem] font-bold tracking-[0.15em] text-gymora-accent font-mono-hwid leading-none">
                 {dniBuffer}
               </p>
             </div>
