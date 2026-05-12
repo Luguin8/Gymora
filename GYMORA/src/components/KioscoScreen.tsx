@@ -188,6 +188,8 @@ export default function KioscoScreen() {
         e.preventDefault();
 
         setDniBuffer((prev) => {
+          // Límite de 15 dígitos para evitar desborde visual extremo
+          if (prev.length >= 15) return prev;
           const newBuffer = prev + key;
           return newBuffer;
         });
@@ -441,9 +443,11 @@ export default function KioscoScreen() {
           <div className="space-y-4">
             <div className="bg-gymora-surface border border-gymora-accent/30 rounded-none px-10 py-8 min-w-[400px]">
               {/* DNI en tipografía MASIVA monoespaciada */}
-              <p className="text-[12rem] md:text-[15rem] font-bold tracking-[0.15em] text-gymora-accent font-mono-hwid leading-none">
-                {dniBuffer}
-              </p>
+              <div className="w-full overflow-hidden">
+                <p className="text-[12rem] md:text-[15rem] font-bold tracking-[0.15em] text-gymora-accent font-mono-hwid leading-none truncate w-full text-center">
+                  {dniBuffer}
+                </p>
+              </div>
             </div>
 
             {/* Hint de instrucciones */}

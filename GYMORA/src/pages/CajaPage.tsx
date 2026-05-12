@@ -1,7 +1,7 @@
 // CajaPage.tsx — Módulo de Cobro de Cuotas
 // Flujo: Buscar alumno → Seleccionar tipo de cuota → Ingresar monto → Registrar pago
 // Ejecuta secuencialmente: crear_cuota + registrar_pago
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "../context/AuthContext";
 import { Wallet, Search, AlertCircle, CheckCircle } from "lucide-react";
@@ -32,6 +32,7 @@ export default function CajaPage() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const isProcessingRef = useRef(false);
 
   const buscarAlumno = async () => {
     if (!dniSearch.trim()) { setSearchError("Ingresá un DNI"); return; }
@@ -47,6 +48,7 @@ export default function CajaPage() {
   };
 
   const handleCobrar = async () => {
+    if (isProcessingRef.current) return;
     if (!selectedAlumno) return;
     if (!monto.trim() || isNaN(Number(monto)) || Number(monto) <= 0) {
       setFormError("Ingresá un monto válido mayor a 0"); return;
@@ -55,15 +57,24 @@ export default function CajaPage() {
       setFormError("Ingresá una cantidad de clases válida"); return;
     }
 
+    isProcessingRef.current = true;
     setIsProcessing(true); setFormError(""); setFormSuccess("");
 
     try {
-      // Calcular fechas de la cuota
+      // Helper para obtener YYYY-MM-DD en hora local
+      const toLocalDateString = (d: Date) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      };
+
+      // Calcular fechas de la cuota localmente
       const hoy = new Date();
-      const fechaInicio = hoy.toISOString().split("T")[0];
+      const fechaInicio = toLocalDateString(hoy);
       const vencimiento = new Date(hoy);
       vencimiento.setMonth(vencimiento.getMonth() + 1);
-      const fechaVencimiento = vencimiento.toISOString().split("T")[0];
+      const fechaVencimiento = toLocalDateString(vencimiento);
 
       // 1. Crear la cuota
       const clases = tipoCuota === "mensual" ? 0 : Number(clasesTotales);
@@ -96,6 +107,7 @@ export default function CajaPage() {
       setFormError(`${err}`);
     } finally {
       setIsProcessing(false);
+      isProcessingRef.current = false;
     }
   };
 

@@ -24,7 +24,15 @@ export default function DashboardPage() {
   const [pdfStatus, setPdfStatus] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  const fechaHoy = new Date().toISOString().split("T")[0];
+  // Helper para obtener YYYY-MM-DD en hora local
+  const toLocalDateString = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const fechaHoy = toLocalDateString(new Date());
 
   const loadMetricas = useCallback(async () => {
     setIsLoading(true); setError("");
